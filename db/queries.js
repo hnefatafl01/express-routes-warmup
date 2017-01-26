@@ -1,7 +1,29 @@
-var knex = require('../db/knex');
+var knex = require('./knex');
 
 module.exports =  {
   getUserByEmail: function(email) {
     return knex('user').where('email', email).first();
+  },
+  getSessions: function() {
+    return knex('session').select();
+  },
+  getSessionById: function(id) {
+    return knex('session').select().where('id', id);
+  },
+  addSession: function(session) {
+    return knex('session')
+      .insert(session, 'id')
+      .then(function(id) {
+        return id[0];
+      })
+  },
+  updateSession: function(body, id) {
+    return knex('session')
+    .returning('*')
+    .update(body)
+    .where('id', id)
+  },
+  deleteSession: function(id) {
+    return knex('session').where('id',id).del()
   }
 }
