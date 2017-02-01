@@ -11,20 +11,49 @@ router.get('/', function(req, res, next) {
 function validUser(user) {
   const validEmail = typeof user.email == 'string' && user.email.trim() != "";
   const validPassword = typeof user.password == 'string' && user.password.trim() != "";
+  if(validEmail && validPassword) {
+    return true
+  }
 }
 
 router.post('/signup', function(req,res,next){
-  console.log(req.body);
-  if(validUser(req.body)) {
+  if(validUser(req.body)){
+    let newUser = {
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, 8)
+    }
     queries
-    .getUserByEmail(req.body.email)
-    .then(function(user){
-      res.json({user})
+    .createUser(newUser)
+    .then(function(result){
+      res.json(result)
+    })
+    .catch(function(err) {
+      next(err);
     })
   } else {
     next(new Error('Invalid User'))
   }
+})
 
+router.post('/login', function(req,res,next) {
+  if(validUser(req.body)){
+    let userEmail = req.body.email;
+    let userPassword = req.body.password;
+    queries
+    .getUserByEmail(userEmail)
+    .then(function(result) {
+      if(bcrypt.compareSync(userPassword, result.password)){
+        res.json({
+          results: result,
+          message: '🔓'
+        })
+      } else {
+        res.json({
+          message: "Invalid password 🔐"
+        })
+      }
+    })
+  }
 })
 
 module.exports = router;

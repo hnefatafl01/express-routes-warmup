@@ -4,6 +4,9 @@ module.exports =  {
   getUserByEmail: function(email) {
     return knex('user').where('email', email).first();
   },
+  createUser: function(user) {
+    return knex('user').returning('*').insert(user);
+  },
   getSessions: function() {
     return knex('session').select();
   },
